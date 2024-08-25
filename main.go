@@ -87,3 +87,6 @@ func main() {
 	fmt.Println("All goroutines are done")
 
 }
+
+//Task 4: Fan-In Pattern
+//Objective: Implement the fan-in pattern where multiple goroutines send data into a single channel.
