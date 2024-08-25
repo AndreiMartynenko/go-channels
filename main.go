@@ -90,3 +90,43 @@ func main() {
 
 //Task 4: Fan-In Pattern
 //Objective: Implement the fan-in pattern where multiple goroutines send data into a single channel.
+
+package main
+
+import (
+"fmt"
+)
+
+func main() {
+	ch1 := make(chan string)
+	ch2 := make(chan string)
+
+	go func() {
+		ch1 <- "Hello"
+	}()
+
+	go func() {
+		ch2 <- "World"
+	}()
+
+	merged := fanIn(ch1, ch2)
+
+	for i := 0; i < 2; i++ {
+		fmt.Println(<-merged)
+	}
+}
+
+func fanIn(input1, input2 chan string) chan string {
+	output := make(chan string)
+	go func() {
+		for {
+			output <- <-input1
+		}
+	}()
+	go func() {
+		for {
+			output <- <-input2
+		}
+	}()
+	return output
+}
