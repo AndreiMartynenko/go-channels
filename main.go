@@ -291,28 +291,50 @@ import (
 //}
 
 // Objective: Combine multiple channels with a timeout using the select statement.
+//func main() {
+//	ch1 := make(chan int)
+//	ch2 := make(chan int)
+//
+//	go func() {
+//		time.Sleep(1 * time.Second)
+//		ch1 <- 1
+//	}()
+//
+//	go func() {
+//		time.Sleep(2 * time.Second)
+//		ch2 <- 2
+//	}()
+//
+//	for i := 0; i < 2; i++ {
+//		select {
+//		case val := <-ch1:
+//			fmt.Println("Received from ch1:", val)
+//		case val := <-ch2:
+//			fmt.Println("Received from ch2:", val)
+//		case <-time.After(3 * time.Second):
+//			fmt.Println("Timeout!")
+//		}
+//	}
+//}
+
+// Objective: Implement a simple throttling mechanism using channels.
+
 func main() {
-	ch1 := make(chan int)
-	ch2 := make(chan int)
+	throttle := make(chan time.Time, 3)
 
-	go func() {
-		time.Sleep(1 * time.Second)
-		ch1 <- 1
-	}()
-
-	go func() {
-		time.Sleep(2 * time.Second)
-		ch2 <- 2
-	}()
-
-	for i := 0; i < 2; i++ {
-		select {
-		case val := <-ch1:
-			fmt.Println("Received from ch1:", val)
-		case val := <-ch2:
-			fmt.Println("Received from ch2:", val)
-		case <-time.After(3 * time.Second):
-			fmt.Println("Timeout!")
-		}
+	for i := 0; i < 3; i++ {
+		throttle <- time.Now()
 	}
+
+	go func() {
+		for t := range time.Tick(1 * time.Second) {
+			throttle <- t
+		}
+	}()
+
+	for i := 0; i < 10; i++ {
+		<-throttle // Block until we can process the next task
+		fmt.Println("Processing task", i, "at", time.Now())
+	}
+
 }
