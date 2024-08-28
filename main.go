@@ -1,8 +1,6 @@
 package main
 
-import (
-	"fmt"
-)
+import "fmt"
 
 /*
 +-------------------------------+
@@ -227,47 +225,64 @@ import (
 //Objective: Implement a pipeline pattern where data flows
 //through multiple stages of processing.
 
+//func main() {
+//	nums := gen(2, 3)
+//
+//	square := square(nums)
+//
+//	double := double(square)
+//
+//	for result := range double {
+//		fmt.Println("Result:", result)
+//	}
+//}
+//
+//func gen(nums ...int) chan int {
+//	out := make(chan int)
+//	go func() {
+//		for _, n := range nums {
+//			out <- n
+//		}
+//		close(out)
+//	}()
+//	return out
+//}
+//
+//func square(in chan int) chan int {
+//	out := make(chan int)
+//	go func() {
+//		for n := range in {
+//			out <- n * n
+//		}
+//		close(out)
+//	}()
+//	return out
+//}
+//
+//func double(in chan int) chan int {
+//	out := make(chan int)
+//	go func() {
+//		for n := range in {
+//			out <- n * 2
+//		}
+//		close(out)
+//	}()
+//	return out
+//}
+
+//Objective: Learn how to handle closed channels properly in Go.
+
 func main() {
-	nums := gen(2, 3)
+	ch := make(chan int)
 
-	square := square(nums)
+	go func() {
+		defer close(ch)
+		for i := 0; i < 3; i++ {
+			ch <- i
+		}
+	}()
 
-	double := double(square)
-
-	for result := range double {
-		fmt.Println("Result:", result)
+	for value := range ch {
+		fmt.Println("Received data:", value)
 	}
-}
-
-func gen(nums ...int) chan int {
-	out := make(chan int)
-	go func() {
-		for _, n := range nums {
-			out <- n
-		}
-		close(out)
-	}()
-	return out
-}
-
-func square(in chan int) chan int {
-	out := make(chan int)
-	go func() {
-		for n := range in {
-			out <- n * n
-		}
-		close(out)
-	}()
-	return out
-}
-
-func double(in chan int) chan int {
-	out := make(chan int)
-	go func() {
-		for n := range in {
-			out <- n * 2
-		}
-		close(out)
-	}()
-	return out
 }
