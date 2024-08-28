@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"sync"
 )
 
 /*
@@ -171,33 +170,104 @@ import (
 
 //Objective: Build a simple worker pool using channels to distribute tasks among multiple workers.
 
+//func main() {
+//	tasks := make(chan int, 10)
+//	results := make(chan int, 10)
+//
+//	var wg sync.WaitGroup
+//	for i := 0; i < 3; i++ { // Create 3 workers
+//		wg.Add(1)
+//		go worker(tasks, results, &wg)
+//	}
+//
+//	for i := 0; i < 10; i++ {
+//		tasks <- i
+//	}
+//	close(tasks)
+//
+//	wg.Wait()
+//	close(results)
+//
+//	for result := range results {
+//		fmt.Println("Result: ", result)
+//	}
+//
+//}
+//
+//func worker(tasks <-chan int, results chan<- int, wg *sync.WaitGroup) {
+//	defer wg.Done()
+//	for task := range tasks {
+//		results <- task * 2 // Simple processing: multiply task by 2
+//	}
+//}
+
+// Objective: Understand and avoid deadlocks in Go channels.
+
+//func main() {
+//	ch := make(chan int)
+//
+//	// This goroutine will block forever
+//	// because there are no receivers for the channel.
+//	go func() {
+//		ch <- 10
+//		close(ch) // Closing the channel avoids deadlock
+//	}()
+//
+//	// Sleep for a bit to allow the goroutine to start
+//	time.Sleep(time.Second)
+//
+//	// Receive the data from the channel
+//	for value := range ch {
+//		fmt.Println("Received data:", value)
+//	}
+//	// Avoid sending on a closed channel to prevent panic
+//	//ch <- 20
+//}
+
+//Objective: Implement a pipeline pattern where data flows
+//through multiple stages of processing.
+
 func main() {
-	tasks := make(chan int, 10)
-	results := make(chan int, 10)
+	nums := gen(2, 3)
 
-	var wg sync.WaitGroup
-	for i := 0; i < 3; i++ { // Create 3 workers
-		wg.Add(1)
-		go worker(tasks, results, &wg)
+	square := square(nums)
+
+	double := double(square)
+
+	for result := range double {
+		fmt.Println("Result:", result)
 	}
-
-	for i := 0; i < 10; i++ {
-		tasks <- i
-	}
-	close(tasks)
-
-	wg.Wait()
-	close(results)
-
-	for result := range results {
-		fmt.Println("Result: ", result)
-	}
-
 }
 
-func worker(tasks <-chan int, results chan<- int, wg *sync.WaitGroup) {
-	defer wg.Done()
-	for task := range tasks {
-		results <- task * 2 // Simple processing: multiply task by 2
-	}
+func gen(nums ...int) chan int {
+	out := make(chan int)
+	go func() {
+		for _, n := range nums {
+			out <- n
+		}
+		close(out)
+	}()
+	return out
+}
+
+func square(in chan int) chan int {
+	out := make(chan int)
+	go func() {
+		for n := range in {
+			out <- n * n
+		}
+		close(out)
+	}()
+	return out
+}
+
+func double(in chan int) chan int {
+	out := make(chan int)
+	go func() {
+		for n := range in {
+			out <- n * 2
+		}
+		close(out)
+	}()
+	return out
 }
