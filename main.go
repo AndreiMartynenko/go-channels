@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"time"
+	"sync"
 )
 
 /*
@@ -319,22 +319,48 @@ import (
 
 // Objective: Implement a simple throttling mechanism using channels.
 
+//func main() {
+//	throttle := make(chan time.Time, 3)
+//
+//	for i := 0; i < 3; i++ {
+//		throttle <- time.Now()
+//	}
+//
+//	go func() {
+//		for t := range time.Tick(1 * time.Second) {
+//			throttle <- t
+//		}
+//	}()
+//
+//	for i := 0; i < 10; i++ {
+//		<-throttle // Block until we can process the next task
+//		fmt.Println("Processing task", i, "at", time.Now())
+//	}
+//
+//}
+
+// Objective: Implement a producer-consumer problem using channels.
+
 func main() {
-	throttle := make(chan time.Time, 3)
+	tasks := make(chan int, 10)
+	var wg sync.WaitGroup
 
-	for i := 0; i < 3; i++ {
-		throttle <- time.Now()
+	for i := 1; i <= 3; i++ {
+		wg.Add(1)
+		go consumer(i, tasks, &wg)
 	}
 
-	go func() {
-		for t := range time.Tick(1 * time.Second) {
-			throttle <- t
-		}
-	}()
-
-	for i := 0; i < 10; i++ {
-		<-throttle // Block until we can process the next task
-		fmt.Println("Processing task", i, "at", time.Now())
+	for i := 1; i <= 10; i++ {
+		tasks <- i
 	}
+	close(tasks)
 
+	wg.Wait()
+}
+
+func consumer(id int, tasks chan int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for task := range tasks {
+		fmt.Printf("Consumer %d processed task %d\n", id, task)
+	}
 }
