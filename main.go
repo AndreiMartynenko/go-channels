@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"time"
+	"sync"
 )
 
 /*
@@ -153,18 +153,51 @@ import (
 
 //Objective: Implement a timeout mechanism using channels and the time.After function.
 
+//func main() {
+//	ch := make(chan string)
+//
+//	go func() {
+//		time.Sleep(2 * time.Second)
+//		ch <- "Hello"
+//	}()
+//
+//	select {
+//	case msg := <-ch:
+//		fmt.Println(msg)
+//	case <-time.After(1 * time.Second):
+//		fmt.Println("Timeout")
+//	}
+//}
+
+//Objective: Build a simple worker pool using channels to distribute tasks among multiple workers.
+
 func main() {
-	ch := make(chan string)
+	tasks := make(chan int, 10)
+	results := make(chan int, 10)
 
-	go func() {
-		time.Sleep(2 * time.Second)
-		ch <- "Hello"
-	}()
+	var wg sync.WaitGroup
+	for i := 0; i < 3; i++ { // Create 3 workers
+		wg.Add(1)
+		go worker(tasks, results, &wg)
+	}
 
-	select {
-	case msg := <-ch:
-		fmt.Println(msg)
-	case <-time.After(1 * time.Second):
-		fmt.Println("Timeout")
+	for i := 0; i < 10; i++ {
+		tasks <- i
+	}
+	close(tasks)
+
+	wg.Wait()
+	close(results)
+
+	for result := range results {
+		fmt.Println("Result: ", result)
+	}
+
+}
+
+func worker(tasks <-chan int, results chan<- int, wg *sync.WaitGroup) {
+	defer wg.Done()
+	for task := range tasks {
+		results <- task * 2 // Simple processing: multiply task by 2
 	}
 }
