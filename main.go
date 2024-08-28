@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 /*
 +-------------------------------+
@@ -272,17 +275,44 @@ import "fmt"
 
 //Objective: Learn how to handle closed channels properly in Go.
 
+//func main() {
+//	ch := make(chan int)
+//
+//	go func() {
+//		defer close(ch)
+//		for i := 0; i < 3; i++ {
+//			ch <- i
+//		}
+//	}()
+//
+//	for value := range ch {
+//		fmt.Println("Received data:", value)
+//	}
+//}
+
+// Objective: Combine multiple channels with a timeout using the select statement.
 func main() {
-	ch := make(chan int)
+	ch1 := make(chan int)
+	ch2 := make(chan int)
 
 	go func() {
-		defer close(ch)
-		for i := 0; i < 3; i++ {
-			ch <- i
-		}
+		time.Sleep(1 * time.Second)
+		ch1 <- 1
 	}()
 
-	for value := range ch {
-		fmt.Println("Received data:", value)
+	go func() {
+		time.Sleep(2 * time.Second)
+		ch2 <- 2
+	}()
+
+	for i := 0; i < 2; i++ {
+		select {
+		case val := <-ch1:
+			fmt.Println("Received from ch1:", val)
+		case val := <-ch2:
+			fmt.Println("Received from ch2:", val)
+		case <-time.After(3 * time.Second):
+			fmt.Println("Timeout!")
+		}
 	}
 }
