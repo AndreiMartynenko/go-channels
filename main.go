@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"sync"
 )
 
 /*
@@ -65,37 +64,31 @@ import (
 //}
 
 // Objective: Use channels to synchronize two goroutines.
-func main() {
-
-	done := make(chan struct{})
-
-	var wg sync.WaitGroup
-	wg.Add(2)
-
-	go func() {
-		defer wg.Done()
-		fmt.Println("Goroutine 1: is done")
-	}()
-
-	go func() {
-		defer wg.Done()
-		fmt.Println("Goroutine 2: is done")
-	}()
-
-	wg.Wait()
-	close(done)
-	fmt.Println("All goroutines are done")
-
-}
+//func main() {
+//
+//	done := make(chan struct{})
+//
+//	var wg sync.WaitGroup
+//	wg.Add(2)
+//
+//	go func() {
+//		defer wg.Done()
+//		fmt.Println("Goroutine 1: is done")
+//	}()
+//
+//	go func() {
+//		defer wg.Done()
+//		fmt.Println("Goroutine 2: is done")
+//	}()
+//
+//	wg.Wait()
+//	close(done)
+//	fmt.Println("All goroutines are done")
+//
+//}
 
 //Task 4: Fan-In Pattern
 //Objective: Implement the fan-in pattern where multiple goroutines send data into a single channel.
-
-package main
-
-import (
-"fmt"
-)
 
 func main() {
 	ch1 := make(chan string)
