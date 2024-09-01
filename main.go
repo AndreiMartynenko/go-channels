@@ -1,10 +1,5 @@
 package main
 
-import (
-	"fmt"
-	"sync"
-)
-
 /*
 +-------------------------------+
 |           hchan                |
@@ -368,28 +363,28 @@ import (
 //Objective: Implement a broadcasting system where
 //a single sender sends data to multiple receivers.
 
-func main() {
-	ch := make(chan int)
-	var wg sync.WaitGroup
-
-	for i := 1; i <= 3; i++ {
-		wg.Add(1)
-		go receiver(i, ch, &wg)
-	}
-
-	go func() {
-		for i := 1; i <= 3; i++ {
-			ch <- i
-		}
-		close(ch)
-	}()
-
-	wg.Wait()
-}
-
-func receiver(id int, ch chan int, wg *sync.WaitGroup) {
-	defer wg.Done()
-	for value := range ch {
-		fmt.Printf("Receiver %d received: %d\n", id, value)
-	}
-}
+//func main() {
+//	ch := make(chan int)
+//	var wg sync.WaitGroup
+//
+//	for i := 1; i <= 3; i++ {
+//		wg.Add(1)
+//		go receiver(i, ch, &wg)
+//	}
+//
+//	go func() {
+//		for i := 1; i <= 3; i++ {
+//			ch <- i
+//		}
+//		close(ch)
+//	}()
+//
+//	wg.Wait()
+//}
+//
+//func receiver(id int, ch chan int, wg *sync.WaitGroup) {
+//	defer wg.Done()
+//	for value := range ch {
+//		fmt.Printf("Receiver %d received: %d\n", id, value)
+//	}
+//}
